@@ -34,13 +34,6 @@ def create_app():
     cursor = db.cursor()
 
 
-
-def create_app():
-    with app.app_context():
-        init_db()
-    return app
-
-
 @app.teardown_appcontext
 def close_db(error):
     """Close the database at the end of the request."""
@@ -54,9 +47,10 @@ def index():
     # just for testing purposes
     db.execute('INSERT into exam (title, cfu) values (?, ?)',
                ["Analisi Matematica", 6])
-    res = db.execute('SELECT * FROM exam').fetchall()
-
-    return render_template("index.html")
+    res = db.execute('SELECT * FROM exam')
+    res.row_factory = lambda _, x: {'id': x[0], 'title': x[1], 'cfu': x[2]}
+    exams = res.fetchall()
+    return render_template("index.html", exams=exams)
 
 
 if __name__ == '__main__':
