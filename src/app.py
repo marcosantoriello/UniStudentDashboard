@@ -18,6 +18,10 @@ def connect_db():
     with open('./data/schema.sql') as f:
         conn.executescript(f.read())
     print('Table created!', flush=True)
+    # if the db hasn't been populated yet
+    if conn.execute('SELECT * from exam').fetchone() is None:
+        with open('./data/populate.sql') as f:
+            conn.executescript(f.read())
     return conn
 
 
@@ -41,16 +45,18 @@ def close_db(error):
         g.sqlite_db.close()
 
 
+
 @app.route('/')
 def index():
     db = get_db()
     # just for testing purposes
-    db.execute('INSERT into exam (title, cfu) values (?, ?)',
-               ["Analisi Matematica", 6])
     res = db.execute('SELECT * FROM exam')
-    res.row_factory = lambda _, x: {'id': x[0], 'title': x[1], 'cfu': x[2]}
+    res.row_factory = lambda _, x: {'id': x[0], 'title': x[1], 'cfu': x[2], 'passed': x[3]}
     exams = res.fetchall()
     return render_template("index.html", exams=exams)
+
+
+
 
 
 if __name__ == '__main__':
