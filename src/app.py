@@ -45,18 +45,36 @@ def close_db(error):
         g.sqlite_db.close()
 
 
+def calculate_arithmetic_average(exams) -> float:
+    total_grades = sum(exam['grade'] for exam in exams)
+    total_exams = len(exams)
+    return total_grades / total_exams
+
+
+def calculate_weighted_average(exams: list) -> float:
+    total_cfu = sum(exam['cfu'] for exam in exams)
+    total_grades_cfu = sum(exam['grade'] * exam['cfu'] for exam in exams)
+    return total_grades_cfu / total_cfu
+
+
+def calculate_graduation_grade(exams) -> float:
+    weighted_average = calculate_weighted_average(exams)
+    weight_one_hundred_and_ten = weighted_average * 110 / 30
+    return weight_one_hundred_and_ten
+
 
 @app.route('/')
 def index():
     db = get_db()
     # just for testing purposes
     res = db.execute('SELECT * FROM exam')
-    res.row_factory = lambda _, x: {'id': x[0], 'title': x[1], 'cfu': x[2], 'passed': x[3]}
+    res.row_factory = lambda _, x: {'id': x[0], 'title': x[1], 'cfu': x[2], 'grade': x[3], 'passed': x[4]}
     exams = res.fetchall()
-    return render_template("index.html", exams=exams)
-
-
-
+    arithmetic_average = calculate_arithmetic_average(exams)
+    weighted_average = calculate_weighted_average(exams)
+    graduation_grade = calculate_graduation_grade(exams)
+    return render_template("index.html", exams=exams, arithmetic_average=arithmetic_average,
+                           weighted_average=weighted_average, graduation_grade=graduation_grade)
 
 
 if __name__ == '__main__':
