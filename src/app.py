@@ -76,6 +76,14 @@ def index():
     return render_template("index.html", exams=exams, arithmetic_average=arithmetic_average,
                            weighted_average=weighted_average, graduation_grade=graduation_grade)
 
+@app.route('/new', methods=["GET, POST"])
+def new():
+    if request.method == "POST":
+        print('In progress...', flush=True)
+        # todo: note creation
+        return render_template('new_exam.html')
+    return render_template('new_exam.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='127.0.0.1', port=5000)
